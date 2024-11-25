@@ -6,6 +6,10 @@ const pick = require("../util/pick"),
 exports.handler = async (e, t) => {
   let { url: r } = e.queryStringParameters,
     { jpeg: s, bw: o, l: a } = e.queryStringParameters;
+  if (!urlContainsDomain(r, process.env.DOMAIN)) {
+        return;
+    } 
+  
   if (!r)
     return { statusCode: 200, body: "Bandwidth Hero Data Compression Service" };
   try {
@@ -24,6 +28,7 @@ exports.handler = async (e, t) => {
           "user-agent": "Bandwidth-Hero Compressor",
           "x-forwarded-for": e.headers["x-forwarded-for"] || e.ip,
           via: "1.1 bandwidth-hero",
+          'Authorization': process.env.AUTH ,
         },
       }).then(async (e) =>
         e.ok
@@ -61,3 +66,13 @@ exports.handler = async (e, t) => {
     return console.error(f), { statusCode: 500, body: f.message || "" };
   }
 };
+
+function urlContainsDomain(url, domain) {
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.hostname.includes(domain);
+  } catch (error) {
+    console.error("Invalid URL:", error);
+    return false;
+  }
+}
